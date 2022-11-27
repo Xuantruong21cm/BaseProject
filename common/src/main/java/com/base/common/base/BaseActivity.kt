@@ -29,9 +29,9 @@ import java.util.*
 abstract class BaseActivity<VB : ViewDataBinding> : AppCompatActivity() {
 
     open val TAG = this::class.simpleName
-    private val localeDelegate : LocaleHelperActivityDelegate = LocaleHelperActivityDelegateImpl()
+    private val localeDelegate: LocaleHelperActivityDelegate = LocaleHelperActivityDelegateImpl()
 
-    private var _binding : VB? = null
+    private var _binding: VB? = null
     open val binding get() = _binding!!
 
     private var networkStateChangeReceiver: BroadcastReceiver? = null
@@ -45,7 +45,8 @@ abstract class BaseActivity<VB : ViewDataBinding> : AppCompatActivity() {
         return LocaleHelper.onAttach(context)
     }
 
-    override fun getApplicationContext(): Context = localeDelegate.getApplicationContext(super.getApplicationContext())
+    override fun getApplicationContext(): Context =
+        localeDelegate.getApplicationContext(super.getApplicationContext())
 
     override fun onResume() {
         super.onResume()
@@ -60,7 +61,7 @@ abstract class BaseActivity<VB : ViewDataBinding> : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         lifecycleScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED){
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 onActivityStarted()
             }
         }
@@ -68,19 +69,19 @@ abstract class BaseActivity<VB : ViewDataBinding> : AppCompatActivity() {
         initViewBinding()
         setContentView(binding.root)
 
-        networkStateChangeReceiver = object : BroadcastReceiver(){
+        networkStateChangeReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 intent?.let {
                     context?.let {
-                        if (isFirstTimeLaunch){
+                        if (isFirstTimeLaunch) {
                             isFirstTimeLaunch = false
                             return
                         }
                         isFirstTimeLaunch = NetworkUtil.isNetworkConnected(it)
                         onNetworkStateChanged(isInternetConnected)
-                        if (!isInternetConnected && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)){
+                        if (!isInternetConnected && lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
                             // Show Toast or SnarkBar no internet
-                        }else{
+                        } else {
                             // Dismiss Toast or SnarkBar no internet
                         }
                     }
@@ -89,7 +90,8 @@ abstract class BaseActivity<VB : ViewDataBinding> : AppCompatActivity() {
         }
 
         applicationContext.registerReceiver(
-            networkStateChangeReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION))
+            networkStateChangeReceiver, IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION)
+        )
 
         initViews()
 
@@ -162,14 +164,25 @@ abstract class BaseActivity<VB : ViewDataBinding> : AppCompatActivity() {
         }
     }
 
-    fun replaceFragment(fragment: Fragment, resId : Int ) {
+    fun replaceFragment(fragment: Fragment, resId: Int) {
         supportFragmentManager.beginTransaction().setCustomAnimations(
             R.anim.enter_from_right,
             R.anim.exit_to_left,
             R.anim.enter_from_left,
-            R.anim.exit_to_right)
+            R.anim.exit_to_right
+        )
             .replace(resId, fragment)
             .addToBackStack(fragment::class.simpleName)
             .commit()
+    }
+
+    fun addFragment(fragment: Fragment, resId: Int) {
+        supportFragmentManager.beginTransaction().setCustomAnimations(
+            R.anim.enter_from_right,
+            R.anim.exit_to_left,
+            R.anim.enter_from_left,
+            R.anim.exit_to_right
+        )
+            .add(resId, fragment).addToBackStack(fragment::class.simpleName).commit()
     }
 }

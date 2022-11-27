@@ -11,7 +11,15 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.text.TextUtils
 import android.util.DisplayMetrics
+import android.view.View
 import android.view.WindowInsets
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
+import android.widget.Toast
+import com.base.common.R
+import com.google.android.material.snackbar.Snackbar
+import com.google.gson.Gson
+import org.greenrobot.eventbus.EventBus
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -127,3 +135,47 @@ data class DataSave(
     var path: String? = "",
     var contentValues: ContentValues?
 )
+
+fun Any.toJsonString(): String = Gson().toJson(this)
+
+fun <A : Any> String.toJsonModel(modelClass: Class<A>): A = Gson().fromJson(this, modelClass)
+
+fun Any.registerEventBusBy(needToSubscribe: Boolean = true) {
+    if (!EventBus.getDefault().isRegistered(this) && needToSubscribe) {
+        EventBus.getDefault().register(this)
+    }
+}
+
+fun Any.unRegisterEventBus() {
+    if (EventBus.getDefault().isRegistered(this)) {
+        EventBus.getDefault().unregister(this)
+    }
+}
+
+fun hideSoftInput(activity: Activity) {
+    var view = activity.currentFocus
+    if (view == null) view = View(activity)
+    val imm = activity.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.hideSoftInputFromWindow(view.windowToken, 0)
+}
+
+fun showSoftInput(edit: EditText, context: Context) {
+    edit.isFocusable = true
+    edit.isFocusableInTouchMode = true
+    edit.requestFocus()
+    val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+    imm.showSoftInput(edit, 0)
+}
+
+fun showMessage(context: Context, message: String?) {
+    Toast.makeText(
+        context,
+        message ,
+        Toast.LENGTH_SHORT
+    )
+        .show()
+}
+
+fun showNoInternetAlert(activity: Activity,view: View) {
+    Snackbar.make(view,R.string.no_internet,Snackbar.LENGTH_SHORT).show()
+}

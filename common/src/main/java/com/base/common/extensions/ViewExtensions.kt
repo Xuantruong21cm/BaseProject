@@ -4,10 +4,13 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.net.Uri
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import androidx.constraintlayout.widget.Group
+import androidx.viewbinding.ViewBinding
 import com.base.common.utils.OnSingleClickListener
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestBuilder
@@ -19,6 +22,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import java.io.File
+import java.lang.reflect.ParameterizedType
 
 fun View.show() {
     if (visibility == View.VISIBLE) return
@@ -67,6 +71,22 @@ fun View.hideKeyboard() {
     val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
     imm.hideSoftInputFromWindow(windowToken, 0)
 }
+
+fun <VB : ViewBinding> Any.inflateViewBinding(
+    inflater: LayoutInflater,
+    parent: ViewGroup? = null,
+    attachToParent: Boolean = false
+): VB {
+    val clazz =
+        (javaClass.genericSuperclass as ParameterizedType).actualTypeArguments[0] as Class<VB>
+    return clazz.getMethod(
+        "inflate",
+        LayoutInflater::class.java,
+        ViewGroup::class.java,
+        Boolean::class.java
+    ).invoke(null, inflater, parent, attachToParent) as VB
+}
+
 
 private fun ImageView.glideLoadImage(requestBuilder: RequestBuilder<Drawable>, type: ImageViewType, cornerRadius: Float = 5f) {
     scaleType = ImageView.ScaleType.CENTER_CROP
